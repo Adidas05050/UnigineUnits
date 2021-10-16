@@ -9,7 +9,7 @@ bool compareUnits(const DefaultUnit* unit1, const DefaultUnit* unit2)
 {
 	const int result = int(unit1->GetPosition().x > unit2->GetPosition().x);
 
-	// Если одна координата совпадает, то сравниваем по второй
+	// Р•СЃР»Рё РѕРґРЅР° РєРѕРѕСЂРґРёРЅР°С‚Р° СЃРѕРІРїР°РґР°РµС‚, С‚Рѕ СЃСЂР°РІРЅРёРІР°РµРј РїРѕ РІС‚РѕСЂРѕР№
 	if (result == 0)
 		return unit1->GetPosition().y - unit2->GetPosition().y < 0 ? true : false;
 	else
@@ -38,7 +38,7 @@ bool InfoLoader::ParseFile(const std::string& filename, std::vector<DefaultUnit>
 		if (temp == "sector" or temp == "Sector") 
 		{
 			file >> temp;
-			// Удаляем запятые в конце
+			// РЈРґР°Р»СЏРµРј Р·Р°РїСЏС‚С‹Рµ РІ РєРѕРЅС†Рµ
 			if (temp.back() == ',')
 				temp.pop_back();
 			sector = stof(temp);
@@ -46,7 +46,7 @@ bool InfoLoader::ParseFile(const std::string& filename, std::vector<DefaultUnit>
 		else if (temp == "distance")
 		{
 			file >> temp;
-			// Удаляем запятые в конце
+			// РЈРґР°Р»СЏРµРј Р·Р°РїСЏС‚С‹Рµ РІ РєРѕРЅС†Рµ
 			if (temp.back() == ',')
 				temp.pop_back();
 			distance = stof(temp);
@@ -56,7 +56,7 @@ bool InfoLoader::ParseFile(const std::string& filename, std::vector<DefaultUnit>
 			file >> temp;
 			size_t openIndex = temp.find_first_of("(");
 			size_t middleIndex = temp.find_first_of(",");
-			// Если скобки нет, то беда с данными
+			// Р•СЃР»Рё СЃРєРѕР±РєРё РЅРµС‚, С‚Рѕ Р±РµРґР° СЃ РґР°РЅРЅС‹РјРё
 			
 			if (openIndex == std::string::npos)
 			{
@@ -66,7 +66,7 @@ bool InfoLoader::ParseFile(const std::string& filename, std::vector<DefaultUnit>
 			position.x = stof(temp.substr(openIndex + 1, middleIndex - 1));
 			size_t endIndex = temp.find_first_of(")");
 
-			// Из-за пробела закрывающая скобка могла не считаться
+			// РР·-Р·Р° РїСЂРѕР±РµР»Р° Р·Р°РєСЂС‹РІР°СЋС‰Р°СЏ СЃРєРѕР±РєР° РјРѕРіР»Р° РЅРµ СЃС‡РёС‚Р°С‚СЊСЃСЏ
 			if (endIndex == std::string::npos)
 			{
 				file >> temp;
@@ -84,7 +84,7 @@ bool InfoLoader::ParseFile(const std::string& filename, std::vector<DefaultUnit>
 			file >> temp;
 			size_t openIndex = temp.find_first_of("(");
 			size_t middleIndex = temp.find_first_of(",");
-			// Если скобки нет, то беда с данными
+			// Р•СЃР»Рё СЃРєРѕР±РєРё РЅРµС‚, С‚Рѕ Р±РµРґР° СЃ РґР°РЅРЅС‹РјРё
 			
 			if (openIndex == std::string::npos)
 			{
@@ -95,7 +95,7 @@ bool InfoLoader::ParseFile(const std::string& filename, std::vector<DefaultUnit>
 
 			size_t endIndex = temp.find_first_of(")");
 
-			// Из-за пробела закрывающая скобка могла не считаться
+			// РР·-Р·Р° РїСЂРѕР±РµР»Р° Р·Р°РєСЂС‹РІР°СЋС‰Р°СЏ СЃРєРѕР±РєР° РјРѕРіР»Р° РЅРµ СЃС‡РёС‚Р°С‚СЊСЃСЏ
 			if (endIndex == std::string::npos)
 			{
 				file >> temp;
@@ -107,26 +107,26 @@ bool InfoLoader::ParseFile(const std::string& filename, std::vector<DefaultUnit>
 			}
 			direction.y = stof(temp);
 		}
-		else // Если считываем что-то невнятное считаем за имя
+		else // Р•СЃР»Рё СЃС‡РёС‚С‹РІР°РµРј С‡С‚Рѕ-С‚Рѕ РЅРµРІРЅСЏС‚РЅРѕРµ СЃС‡РёС‚Р°РµРј Р·Р° РёРјСЏ
 		{
-			// Не добавляем юнита если это первый. Мы не знаем про него информацию ещё
+			// РќРµ РґРѕР±Р°РІР»СЏРµРј СЋРЅРёС‚Р° РµСЃР»Рё СЌС‚Рѕ РїРµСЂРІС‹Р№. РњС‹ РЅРµ Р·РЅР°РµРј РїСЂРѕ РЅРµРіРѕ РёРЅС„РѕСЂРјР°С†РёСЋ РµС‰С‘
 			if (isInfoLittle)
 			{
-				temp.pop_back(); // Убираем запятую
+				temp.pop_back(); // РЈР±РёСЂР°РµРј Р·Р°РїСЏС‚СѓСЋ
 				name = temp;
 				isInfoLittle = false;
 				continue;
 			}
 			
-			// Сначала добавляем юнита в список с имеющейся информацией
+			// РЎРЅР°С‡Р°Р»Р° РґРѕР±Р°РІР»СЏРµРј СЋРЅРёС‚Р° РІ СЃРїРёСЃРѕРє СЃ РёРјРµСЋС‰РµР№СЃСЏ РёРЅС„РѕСЂРјР°С†РёРµР№
 			units.push_back(DefaultUnit(name, position, direction, distance, sector));
 
-			// А потом читаем имя следующего
-			temp.pop_back(); // Убираем запятую
+			// Рђ РїРѕС‚РѕРј С‡РёС‚Р°РµРј РёРјСЏ СЃР»РµРґСѓСЋС‰РµРіРѕ
+			temp.pop_back(); // РЈР±РёСЂР°РµРј Р·Р°РїСЏС‚СѓСЋ
 			name = temp;
 		}
 	}
-	// Если считали полную информацию, но файл кончился принудительно добавляем последний
+	// Р•СЃР»Рё СЃС‡РёС‚Р°Р»Рё РїРѕР»РЅСѓСЋ РёРЅС„РѕСЂРјР°С†РёСЋ, РЅРѕ С„Р°Р№Р» РєРѕРЅС‡РёР»СЃСЏ РїСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ РґРѕР±Р°РІР»СЏРµРј РїРѕСЃР»РµРґРЅРёР№
 	if(!isInfoLittle)
 		units.push_back(DefaultUnit(name, position, direction, distance, sector));
 
@@ -147,7 +147,7 @@ bool UnitsManager::Init(const std::string& filename)
 	std::vector<DefaultUnit*> sortedUnits;
 	for(auto& unit : m_units)
 		sortedUnits.push_back(&unit);
-	// Сортируем юнитов, чтобы поиск соседних был быстрее
+	// РЎРѕСЂС‚РёСЂСѓРµРј СЋРЅРёС‚РѕРІ, С‡С‚РѕР±С‹ РїРѕРёСЃРє СЃРѕСЃРµРґРЅРёС… Р±С‹Р» Р±С‹СЃС‚СЂРµРµ
 	std::sort(sortedUnits.begin(), sortedUnits.end(), compareUnits);
 
 	return true;
