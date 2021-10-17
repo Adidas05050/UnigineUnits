@@ -2,9 +2,12 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
-
+#include <cmath>
+#include <thread>
 namespace
 {
+const int THREADS = 12;
+//-------------------------------------------------------
 bool compareUnits(const DefaultUnit* unit1, const DefaultUnit* unit2)
 {
 	const int result = int(unit1->GetPosition().x > unit2->GetPosition().x);
@@ -15,20 +18,59 @@ bool compareUnits(const DefaultUnit* unit1, const DefaultUnit* unit2)
 	else
 		return result < 0? true : false;
 }
+//-------------------------------------------------------
+void FindUnitsInViewSector(std::vector<DefaultUnit*>& tempUnit, const std::vector<DefaultUnit>& originalUnits)
+{
+	for (auto& unit : tempUnit)
+	{
+		for (const auto& originalUnit : originalUnits)
+		{
+			if (&*unit == &originalUnit)
+				continue;
+
+			if (unit->IsInViewSector(originalUnit))
+				unit->AddVisibleUnit();
+
+		}
+	}
+}
+//-------------------------------------------------------
 }
 DefaultUnit::DefaultUnit(const std::string& name, const Vector2& position, const Vector2& direction, const float viewDistance, const float viewSector)
 	: m_name(name)
 	, m_position(position)
 	, m_direction(direction)
 	, m_viewDistance(viewDistance)
+	, m_visibleUnits(0)
 	, m_viewSector(viewSector)
 {
+	// сразу нормализуем направление
+	m_direction.norm();
+}
+//-------------------------------------------------------
+const bool DefaultUnit::IsInViewSector(const DefaultUnit& unit)
+{
+	Vector2 relativePosition = (unit.GetPosition() - GetPosition());
+	// Если не находится в радиусе видимости, то и проверять на сектор нет смысла
+	if (!(m_viewDistance * m_viewDistance >= (relativePosition.x * relativePosition.x + relativePosition.y * relativePosition.y)))
+		return false;
+
+	relativePosition.norm();
+	const float point = GetDirection().x * relativePosition.x + GetDirection().y * relativePosition.y;
+	// Если угол к точке выходит за рамки половины сектор, то цель не видна
+	return (std::acos(point) * 180.0 / 3.14) <= GetViewSector() / 2;
 }
 //-------------------------------------------------------
 bool InfoLoader::ParseFile(const std::string& filename, std::vector<DefaultUnit>& units)
 {
 	bool isInfoLittle = true;
 	std::ifstream file(filename);
+	if (!file.is_open())
+	{
+		std::cout << "File can`t open for reading.\n";
+		return false;
+	}
+
 	std::string name, temp;
 	float distance = 0.f, sector = 0.f;
 	DefaultUnit::Vector2 position, direction;
@@ -130,28 +172,53 @@ bool InfoLoader::ParseFile(const std::string& filename, std::vector<DefaultUnit>
 	if(!isInfoLittle)
 		units.push_back(DefaultUnit(name, position, direction, distance, sector));
 
+	file.close();
 	return true;
 }
 //-------------------------------------------------------
-bool InfoLoader::SaveFile(const std::string& filename, std::vector<DefaultUnit> units)
+bool InfoLoader::SaveFile(const std::string& filename, const std::vector<DefaultUnit>& units)
 {
-	return false;
+	std::ofstream file(filename);
+	if (!file.is_open())
+	{ 
+		std::cout << "File can`t open for writing.\n";
+		return false;
+	}
+
+	for (const auto& unit : units)
+		file << unit.GetName() << ": sees " << unit.GetVisibleUnits() << "\n";
+
+	file.close();
+	return true;
 }
 //-------------------------------------------------------
-bool UnitsManager::Init(const std::string& filename)
+bool UnitsManager::ManageUnits(const std::string& path, const std::string& filename)
 {
 	InfoLoader* loader = new InfoLoader();
-	if (!loader->ParseFile(filename, m_units))
+	if (!loader->ParseFile(path + filename, m_units))
 		return false;
-	
-	std::vector<DefaultUnit*> sortedUnits;
-	for(auto& unit : m_units)
-		sortedUnits.push_back(&unit);
-	// Сортируем юнитов, чтобы поиск соседних был быстрее
-	std::sort(sortedUnits.begin(), sortedUnits.end(), compareUnits);
 
+	std::vector<std::vector<DefaultUnit*>> tempVectors;
+	std::vector<std::thread> threads;
+	for (int thread = 0; thread < THREADS; ++thread)
+	{
+		std::vector<DefaultUnit*> tempVector;
+		int maxSize = (m_units.size() / THREADS) * (thread + 1);
+		for (int i = (m_units.size() / THREADS) * thread ; i < maxSize; i++)
+			tempVector.push_back(&m_units[i]);
+		tempVectors.emplace_back(tempVector);
+		threads.push_back(std::thread(FindUnitsInViewSector, ref(tempVectors[thread]), ref(m_units)));
+	}
+
+	for (auto& thr : threads) 
+	{
+		thr.join();
+	}
+
+	if (!loader->SaveFile(path + "output_" + filename, m_units))
+		return false;
+
+	std::cout << "Done";
 	return true;
 }
-//-------------------------------------------------------
-
 //-------------------------------------------------------

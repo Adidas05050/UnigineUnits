@@ -4,6 +4,10 @@
 int main()
 {
     UnitsManager* unitsManager = new UnitsManager();
-    if (!unitsManager->Init("D:/Unigine/UnigineUnits/Debug/test.txt"))
+    if (!unitsManager->ManageUnits("D:/Unigine/UnigineUnits/Debug/", "test.txt"))
+    {
         std::cout << "\nERROR!\n";
+        return -1;
+    }
+    return 0;
 }
