@@ -65,9 +65,7 @@ public:
 class UnitsManager
 {
 public:
-    typedef DefaultUnit::Vector2 Vector2;
-
-    bool ManageUnits(const std::string& path, const std::string& filename);
+    bool Init(const std::string& filename);
 
     //void FindUnitsInViewSector(int start, int end);
 private:
