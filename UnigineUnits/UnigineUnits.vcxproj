@@ -140,10 +140,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DefaultUnit.cpp" />
+    <ClCompile Include="FileManager.cpp" />
     <ClCompile Include="UnigineUnits.cpp" />
+    <ClCompile Include="UnitsManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DefaultUnit.h" />
+    <ClInclude Include="FileManager.h" />
+    <ClInclude Include="UnitsManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

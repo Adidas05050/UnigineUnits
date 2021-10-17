@@ -5,71 +5,62 @@
 class DefaultUnit
 {
 public:
-    struct Vector2
+    
+    struct Coordinates
     {
-        Vector2() : x(0.f), y(0.f) { }
+        Coordinates() : x(0.f), y(0.f) { }
         float x;
         float y;
-        const Vector2 operator-(const Vector2& vec2) const
+
+        void norm()
         {
-            Vector2 result;
+            const float lenght = sqrtf(x * x + y * y);
+            x /= lenght;
+            y /= lenght;
+        }
+
+        const Coordinates operator-(const DefaultUnit::Coordinates& vec2) const
+        {
+            DefaultUnit::Coordinates result;
             result.x = this->x - vec2.x;
             result.y = this->y - vec2.y;
             return result;
         }
 
-        const Vector2 operator/=(const float value)
+        const Coordinates& operator/=(const float value)
         {
-            Vector2 result;
-            result.x = this->x / value;
-            result.y = this->y / value;
-            return result;
-        }
-        void norm()
-        {
-            const float lenght = sqrtf(x*x + y*y);
-            x /= lenght;
-            y /= lenght;
+            this->x = this->x / value;
+            this->y = this->y / value;
+            return *this;
         }
     };
 
-    DefaultUnit(const std::string& name, const Vector2& position, const Vector2& direction, const float viewDistance, const float m_viewSector);
+    DefaultUnit(const std::string& name, const Coordinates& position, const Coordinates& direction, const float viewDistance, const float m_viewSector);
 
-    const Vector2&  GetPosition() const { return m_position; }
-    const Vector2&  GetDirection() const { return m_direction; }
-    const float     GetViewDistance() const { return m_viewDistance; }
-    const float     GetViewSector() const { return m_viewSector; }
+    // Получение информации о юните
+    const Coordinates&      GetPosition() const { return m_position; }
+    const Coordinates&      GetDirection() const { return m_direction; }
+    const float             GetViewDistance() const { return m_viewDistance; }
+    const float             GetViewSector() const { return m_viewSector; }
+    const std::string&      GetName() const { return m_name; }
+    // //
+
+                    // Получить число юнитов в поле зрения
     const int       GetVisibleUnits() const { return m_visibleUnits; }
+
+                    // Добавление видимого юнита
     void            AddVisibleUnit() { ++m_visibleUnits; } 
+
+                    // Находится ли юнит в зоне видимости?
     const bool      IsInViewSector(const DefaultUnit& unit);
-    const std::string& GetName() const { return m_name; }
+    
+
 private:
-    std::string m_name;
-    float       m_viewDistance;
-    float       m_viewSector;
-    int         m_visibleUnits;
-    Vector2     m_direction;
-    Vector2     m_position;
-    Vector2     m_viewStartSector;
-    Vector2     m_viewEndSector;
+    std::string     m_name;             // Имя юнита
+    float           m_viewDistance;     // Дистанция обзора
+    float           m_viewSector;       // [Градусы] Сектор обзора
+    int             m_visibleUnits;     // Кол-во видимых юнитов
+    Coordinates     m_direction;        // Направления взгляда
+    Coordinates     m_position;         // Позиция юнита
    
-};
-
-class InfoLoader
-{
-public:
-    bool ParseFile(const std::string& filename, std::vector<DefaultUnit>& units);
-    bool SaveFile(const std::string& filename, const std::vector<DefaultUnit>& units);
-};
-
-class UnitsManager
-{
-public:
-    typedef DefaultUnit::Vector2 Vector2;
-
-    bool ManageUnits(const std::string& path, const std::string& filename);
-
-    //void FindUnitsInViewSector(int start, int end);
-private:
-    std::vector<DefaultUnit> m_units;
 };
