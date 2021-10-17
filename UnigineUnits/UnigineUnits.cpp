@@ -8,7 +8,7 @@ int main()
     std::cout << "Input filename with full path or write default for default file.\n";
     std::cin >> filename;
     if (filename == "default")
-        filename = "D:/Unigine/UnigineUnits/Debug/test.txt";
+        filename = "test.txt";
 
     if (!unitsManager->ManageUnits(filename))
     {
